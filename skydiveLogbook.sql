@@ -7,7 +7,8 @@ CREATE TABLE dropzone
 (
 	dz_id SERIAL,
 	dz_name VARCHAR(200) NOT NULL,
-	city_state VARCHAR(100) NOT NULL,
+	city VARCHAR(100) NOT NULL,
+	state_abbreviation VARCHAR(2),
 	country VARCHAR(100) DEFAULT 'USA',
 
 	CONSTRAINT pk_dz_id PRIMARY KEY (dz_id)
