@@ -34,6 +34,7 @@ CREATE TABLE jump
 	deployment_altitude_in_feet INTEGER NOT NULL,
 	canopy_id INTEGER NOT NULL,
 	distance_from_target_feet INTEGER,
+	number_in_formation INTEGER DEFAULT 1,
 	maneuver VARCHAR(200),
 	description TEXT,
 
@@ -42,5 +43,6 @@ CREATE TABLE jump
 	CONSTRAINT fk_dz_id FOREIGN KEY (dz_id) REFERENCES dropzone (dz_id),
 	CONSTRAINT fk_canopy_id FOREIGN KEY (canopy_id) REFERENCES canopy (canopy_id),
 	CONSTRAINT chk_appropriate_altitudes CHECK (deployment_altitude_in_feet <= exit_altitude_in_feet),
-	CONSTRAINT chk_appropriate_distance CHECK (distance_from_target_feet >= 0)
+	CONSTRAINT chk_appropriate_distance CHECK (distance_from_target_feet >= 0),
+	CONSTRAINT chk_appropriate_group_size CHECK (number_in_formation >= 1)
 );

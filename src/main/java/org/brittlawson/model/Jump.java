@@ -12,6 +12,7 @@ public class Jump {
     private int deploymentAltitudeInFeet;
     private int canopyId;
     private Integer distanceFromTargetFeet;
+    private Integer numberInFormation;
     private String maneuver;
     private String description;
 
@@ -77,6 +78,14 @@ public class Jump {
 
     public void setDistanceFromTargetFeet(Integer distanceFromTargetFeet) {
         this.distanceFromTargetFeet = distanceFromTargetFeet;
+    }
+
+    public Integer getNumberInFormation() {
+        return numberInFormation;
+    }
+
+    public void setNumberInFormation(Integer numberInFormation) {
+        this.numberInFormation = numberInFormation;
     }
 
     public String getManeuver() {
