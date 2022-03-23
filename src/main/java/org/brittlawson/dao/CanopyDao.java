@@ -10,6 +10,5 @@ public interface CanopyDao {
     List<Canopy> getCanopiesBySizeRange (int minSize, int maxSize);
     Canopy getMostRecentCanopyJumped ();
     void updateCanopy (Canopy canopy);
-    void deleteCanopy (Canopy canopy);
 
 }

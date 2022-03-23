@@ -20,7 +20,8 @@ public class JdbcCanopyDao implements CanopyDao {
     public List<Canopy> getAllCanopiesJumped() {
         List<Canopy> canopies = new ArrayList<>();
         String sql = "SELECT canopy_id, platform, size_square_feet " +
-                     "FROM canopy;";
+                     "FROM canopy " +
+                     "ORDER BY size_square_feet;";
         SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
         while (results.next()) {
             canopies.add(mapRowToCanopy(results));
@@ -33,7 +34,8 @@ public class JdbcCanopyDao implements CanopyDao {
         List<Canopy> canopies = new ArrayList<>();
         String sql = "SELECT canopy_id, platform, size_square_feet " +
                      "FROM canopy " +
-                     "WHERE size_square_feet BETWEEN ? AND ?;";
+                     "WHERE size_square_feet BETWEEN ? AND ? " +
+                     "ORDER BY size_square_feet;";
         SqlRowSet results = jdbcTemplate.queryForRowSet(sql, minSize, maxSize);
         while (results.next()) {
             canopies.add(mapRowToCanopy(results));
@@ -60,12 +62,15 @@ public class JdbcCanopyDao implements CanopyDao {
 
     @Override
     public void updateCanopy(Canopy canopy) {
-
+        String sql = "UPDATE canopy " +
+                     "SET platform = ?, size_square_feet = ? " +
+                     "WHERE canopy_id = ?;";
+        jdbcTemplate.update(sql, canopy.getPlatform(), canopy.getSizeSquareFeet(), canopy.getCanopyId());
     }
 
-    @Override
-    public void deleteCanopy(Canopy canopy) {
-
+    public void deleteCanopy(int canopy_id) {
+        String sql = "DELETE FROM canopy WHERE canopy_id = ?;";
+        jdbcTemplate.update(sql, canopy_id);
     }
 
     private Canopy mapRowToCanopy(SqlRowSet rowSet) {
