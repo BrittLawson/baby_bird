@@ -128,7 +128,9 @@ public class JdbcDropzoneDao implements DropzoneDao {
         dropzone.setCity(city);
 
         String stateAbbreviation = rowSet.getString("state_abbreviation");
-        dropzone.setStateAbbreviation(stateAbbreviation);
+        if(stateAbbreviation != null) {
+            dropzone.setStateAbbreviation(stateAbbreviation);
+        }
 
         String country = rowSet.getString("country");
         dropzone.setCountry(country);
