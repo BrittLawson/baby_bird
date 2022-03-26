@@ -15,9 +15,8 @@ public interface JumpDao {
     List<Jump> getJumpsByLandingAccuracy (int maxDistanceFromTarget);
     List<Jump> getJumpsByExitAltitude (int minAltitude, int maxAltitude);
     List<Jump> getJumpsByFormationSize (int minFormationSize);
-    LocalDate getMostRecentJumpDate ();
+    Jump getMostRecentJump ();
     Jump createJump (Jump jump);
     void updateJump (Jump jump);
-    void deleteJump (int jumpNumber);
 
 }

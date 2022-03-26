@@ -9,6 +9,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class JdbcJumpDao implements JumpDao {
 
@@ -49,52 +50,118 @@ public class JdbcJumpDao implements JumpDao {
     public int getTotalNumberJumps() {
         String sql = "SELECT MAX(jump_number) " +
                                "FROM jump;";
-        return jdbcTemplate.queryForObject(sql, Integer.class);
+        Integer result = jdbcTemplate.queryForObject(sql, Integer.class);
+        return Objects.requireNonNullElse(result, 0);
     }
 
     @Override
     public List<Jump> getJumpsByDz(int dzId) {
-        return null;
+        List<Jump> jumps = new ArrayList<>();
+        String sql = "SELECT jump_number, date, dz_id, aircraft, exit_altitude_in_feet, deployment_altitude_in_feet, canopy_id, distance_from_target_feet, number_in_formation, maneuver, description " +
+                     "FROM jump " +
+                     "WHERE dz_id = ?;";
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, dzId);
+        while (results.next()) {
+            jumps.add(mapRowToJump(results));
+        }
+        return jumps;
     }
 
     @Override
     public List<Jump> getJumpsByDateRange(LocalDate startDate, LocalDate endDate) {
-        return null;
+        List<Jump> jumps = new ArrayList<>();
+        String sql = "SELECT jump_number, date, dz_id, aircraft, exit_altitude_in_feet, deployment_altitude_in_feet, canopy_id, distance_from_target_feet, number_in_formation, maneuver, description " +
+                     "FROM jump " +
+                     "WHERE date BETWEEN ? AND ?;";
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, startDate, endDate);
+        while (results.next()) {
+            jumps.add(mapRowToJump(results));
+        }
+        return jumps;
     }
 
     @Override
     public List<Jump> getJumpsByLandingAccuracy(int maxDistanceFromTarget) {
-        return null;
+        List<Jump> jumps = new ArrayList<>();
+        String sql = "SELECT jump_number, date, dz_id, aircraft, exit_altitude_in_feet, deployment_altitude_in_feet, canopy_id, distance_from_target_feet, number_in_formation, maneuver, description " +
+                     "FROM jump " +
+                     "WHERE distance_from_target_feet <= ?;";
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, maxDistanceFromTarget);
+        while (results.next()) {
+            jumps.add(mapRowToJump(results));
+        }
+        return jumps;
     }
 
     @Override
     public List<Jump> getJumpsByExitAltitude(int minAltitude, int maxAltitude) {
-        return null;
+        List<Jump> jumps = new ArrayList<>();
+        String sql = "SELECT jump_number, date, dz_id, aircraft, exit_altitude_in_feet, deployment_altitude_in_feet, canopy_id, distance_from_target_feet, number_in_formation, maneuver, description " +
+                     "FROM jump " +
+                     "WHERE exit_altitude_in_feet BETWEEN ? AND ?;";
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, minAltitude, maxAltitude);
+        while (results.next()) {
+            jumps.add(mapRowToJump(results));
+        }
+        return jumps;
     }
 
     @Override
     public List<Jump> getJumpsByFormationSize(int minFormationSize) {
-        return null;
+        List<Jump> jumps = new ArrayList<>();
+        String sql = "SELECT jump_number, date, dz_id, aircraft, exit_altitude_in_feet, deployment_altitude_in_feet, canopy_id, distance_from_target_feet, number_in_formation, maneuver, description " +
+                     "FROM jump " +
+                     "WHERE number_in_formation >= ?;";
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, minFormationSize);
+        while (results.next()) {
+            jumps.add(mapRowToJump(results));
+        }
+        return jumps;
     }
 
     @Override
-    public LocalDate getMostRecentJumpDate() {
-        return null;
+    public Jump getMostRecentJump() {
+        String sql = "SELECT MAX(jump_number) " +
+                     "FROM jump;";
+        Integer mostRecentJumpNumber = jdbcTemplate.queryForObject(sql, Integer.class);
+        if (mostRecentJumpNumber != null) {
+            return getJump(mostRecentJumpNumber);
+        } else throw new NullPointerException();
     }
 
     @Override
     public Jump createJump(Jump jump) {
-        return null;
+        String sql = "INSERT INTO jump (jump_number, date, dz_id, aircraft, exit_altitude_in_feet, deployment_altitude_in_feet, canopy_id, distance_from_target_feet, number_in_formation, maneuver, description) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING jump_number;";
+        Integer newJumpNumber = jdbcTemplate.queryForObject(sql, Integer.class, jump.getJumpNumber(), jump.getDate(), jump.getDzId(), jump.getAircraft(), jump.getExitAltitudeInFeet(), jump.getDeploymentAltitudeInFeet(), jump.getCanopyId(), jump.getDistanceFromTargetFeet(), jump.getNumberInFormation(), jump.getManeuver(), jump.getDescription());
+        if(newJumpNumber != null) {
+            return getJump(newJumpNumber);
+        } else {
+            throw new NullPointerException();
+        }
     }
 
     @Override
     public void updateJump(Jump jump) {
-
+        String sql = "UPDATE jump " +
+                     "SET date = ?, " +
+                     "    dz_id = ?, " +
+                     "    aircraft = ?, " +
+                     "    exit_altitude_in_feet = ?, " +
+                     "    deployment_altitude_in_feet = ?, " +
+                     "    canopy_id = ?, " +
+                     "    distance_from_target_feet = ?, " +
+                     "    number_in_formation = ?, " +
+                     "    maneuver = ?, " +
+                     "    description = ? " +
+                     "WHERE jump_number = ?;";
+        jdbcTemplate.update(sql, jump.getDate(), jump.getDzId(), jump.getAircraft(), jump.getExitAltitudeInFeet(), jump.getDeploymentAltitudeInFeet(),
+                jump.getCanopyId(), jump.getDistanceFromTargetFeet(), jump.getNumberInFormation(), jump.getManeuver(), jump.getDescription(), jump.getJumpNumber());
     }
 
-    @Override
     public void deleteJump(int jumpNumber) {
-
+        String sql = "DELETE FROM jump WHERE jump_number = ?;";
+        jdbcTemplate.update(sql, jumpNumber);
     }
 
     private Jump mapRowToJump(SqlRowSet rowSet) {

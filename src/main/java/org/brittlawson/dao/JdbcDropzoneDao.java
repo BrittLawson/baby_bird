@@ -66,9 +66,12 @@ public class JdbcDropzoneDao implements DropzoneDao {
                      "GROUP BY jump.dz_id " +
                      "ORDER BY COUNT(*) DESC " +
                      "LIMIT 1;";
-        int dzId = jdbcTemplate.queryForObject(sql, Integer.class);
-
-        return getDropzoneByDzId(dzId);
+        Integer dzId = jdbcTemplate.queryForObject(sql, Integer.class);
+        if (dzId != null) {
+            return getDropzoneByDzId(dzId);
+        } else {
+            throw new NullPointerException();
+        }
     }
 
     @Override
@@ -88,18 +91,19 @@ public class JdbcDropzoneDao implements DropzoneDao {
         return dropzone;
     }
 
-    //think this through more --> want to return zero if dz not found.
-    // Is that not happening? why null pointer exception?
     @Override
     public int getNumberOfJumpsAtGivenDz(int dzId) throws DropzoneNotFoundException {
-        try {
             String sql = "SELECT COUNT(dz_id) " +
                          "FROM jump " +
                          "WHERE dz_id = ?;";
-            return jdbcTemplate.queryForObject(sql, Integer.class, dzId);
-        } catch (NullPointerException  e) {
-            throw new DropzoneNotFoundException();
-        }
+            Integer jumps = jdbcTemplate.queryForObject(sql, Integer.class, dzId);
+            if (jumps == null) {
+                throw new NullPointerException();
+            } else if (jumps == 0) {
+                throw new DropzoneNotFoundException();
+            } else {
+                return jumps;
+            }
     }
 
     @Override
